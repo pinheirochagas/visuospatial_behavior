@@ -9,7 +9,7 @@ days = [2, 3, 2, 3, 3];
 
 root_dir = '/Volumes/LBCN8T/Stanford/visuospatial/';
 
-root_dir = '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/'
+
 
 for i = 1:length(subj_name)
     for ii = 1:days(i)

@@ -3,6 +3,8 @@ function behavfft = BehaviorOscillation(root_dir,subj_name, day_tag)
 % List files
 data_dir = fullfile(root_dir,'data',subj_name, day_tag);
 data_files = dir(fullfile(data_dir, ['*' subj_name '*.mat']));
+data_files_tmp = {data_files(:).name};
+data_files = data_files(find(cellfun(@(x) ~contains(x, '._'), data_files_tmp)));
 
 % Time
 tvec = 500:1200;
@@ -39,7 +41,8 @@ stepsize = 30; % to be defined
 for t = 1:length(tvec)
     currentT= [tvec(t)-stepsize tvec(t)+stepsize];
     tridx = find(data.int_cue_targ_time >= currentT(1) & data.int_cue_targ_time <= currentT(2) & data.targ_type == 1);
-    AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
+%     AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
+    AC(t) = mean(data.response_time(find(data.response_time(tridx) > 0)));
 end
 % Smooth the data
 AC_sm = nanfastsmooth(AC, length(tvec)/ stepsize);
@@ -81,9 +84,11 @@ xlim([min(behavGA.time{1}*1000) max(behavGA.time{1}*1000)])
 
 plot(xlim, [mean(AC) mean(AC)], 'Color', 'k', 'LineWidth',1)
 xlabel('Cue-Target interval ms')
-ylabel('Hit Rate')
+ylabel('RT (ms)')
+% ylabel('Hit Rate')
+
 set(gca,'fontsize',fontsize)
-ylim([0 1])
+% ylim([0 1])
 box on
 
 subplot(1,3,3)
