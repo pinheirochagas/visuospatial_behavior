@@ -1,7 +1,8 @@
 function behavfft = BehaviorOscillation(root_dir,subj_name, day_tag)
 
 % List files
-data_dir = fullfile(root_dir,'data',subj_name, day_tag);
+% data_dir = fullfile(root_dir,'data',subj_name, day_tag);
+data_dir = fullfile(root_dir,subj_name);
 data_files = dir(fullfile(data_dir, ['*' subj_name '*.mat']));
 data_files_tmp = {data_files(:).name};
 data_files = data_files(find(cellfun(@(x) ~contains(x, '._'), data_files_tmp)));
@@ -10,7 +11,7 @@ data_files = data_files(find(cellfun(@(x) ~contains(x, '._'), data_files_tmp)));
 tvec = 500:1200;
 
 % Concatenate runs
-for i = 1:4
+for i = 1:2
     load([data_files(i).folder filesep data_files(i).name ])
     data_tmp = slist;
     correct(i) = sum(data_tmp.error_type == 5)/ size(data_tmp,1);
@@ -29,8 +30,10 @@ xlabel('Block number')
 ylabel('Accuracy')
 hold on
 set(gca,'fontsize',20)
-f_out = sprintf('%sresults/accuracy_by_block_%s_%s.png',root_dir,subj_name,day_tag);
-savePNG(gcf, 600, f_out) 
+% f_out = sprintf('%sresults/accuracy_by_block_%s_%s.png',root_dir,subj_name,day_tag);
+f_out = sprintf('%sresults/accuracy_by_block_%s_%s.png',root_dir,subj_name);
+
+% savePNG(gcf, 600, f_out) 
 
 
 % Accuracy
@@ -41,8 +44,8 @@ stepsize = 30; % to be defined
 for t = 1:length(tvec)
     currentT= [tvec(t)-stepsize tvec(t)+stepsize];
     tridx = find(data.int_cue_targ_time >= currentT(1) & data.int_cue_targ_time <= currentT(2) & data.targ_type == 1);
-%     AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
-    AC(t) = mean(data.response_time(find(data.response_time(tridx) > 0)));
+%      AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
+     AC(t) = mean(data.response_time(find(data.response_time(tridx) > 0)));
 end
 % Smooth the data
 AC_sm = nanfastsmooth(AC, length(tvec)/ stepsize);
