@@ -11,11 +11,11 @@ data_files = data_files(find(cellfun(@(x) ~contains(x, '._'), data_files_tmp)));
 tvec = 500:1200;
 
 % Concatenate runs
-for i = 1:2%1:length(data_files)
+for i = 1:length(data_files)
     load([data_files(i).folder filesep data_files(i).name ])
     data_tmp = slist;
     correct(i) = sum(data_tmp.error_type == 5)/ size(data_tmp,1);
-    if i == 3
+    if i == 1
         data = data_tmp;
     else
         data = vertcat(data, data_tmp);
@@ -44,8 +44,8 @@ stepsize = 30; % to be defined
 for t = 1:length(tvec)
     currentT= [tvec(t)-stepsize tvec(t)+stepsize];
     tridx = find(data.int_cue_targ_time >= currentT(1) & data.int_cue_targ_time <= currentT(2) & data.targ_type == 1);
-        AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
-%         AC(t) = mean(data.response_time(find(data.response_time(tridx) > 0)));
+       AC(t) = length(find(data.response_time(tridx) > 0)) / length(tridx);
+       AC(t) = mean(data.response_time(find(data.response_time(tridx) > 0)));
 end
 % Smooth the data
 AC_sm = nanfastsmooth(AC, length(tvec)/ stepsize);
@@ -87,8 +87,8 @@ xlim([min(behavGA.time{1}*1000) max(behavGA.time{1}*1000)])
 
 plot(xlim, [mean(AC) mean(AC)], 'Color', 'k', 'LineWidth',1)
 xlabel('Cue-Target interval ms')
-%  ylabel('RT (ms)')
- ylabel('Hit Rate')
+% ylabel('RT (ms)')
+ylabel('Hit Rate')
 
 set(gca,'fontsize',fontsize)
 % ylim([0 1])

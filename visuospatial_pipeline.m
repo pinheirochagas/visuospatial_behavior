@@ -9,7 +9,7 @@ days = [2, 3, 2, 3, 3];
 
 root_dir = '/Volumes/LBCN8T/Stanford/visuospatial/';
 
-
+root_dir = '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/'
 
 for i = 1:length(subj_name)
     for ii = 1:days(i)
@@ -21,6 +21,15 @@ end
 
 
 
+subj_name = '141s'
+prms.tvec =  500:1200;
+prms.tvec =  400:800;
+
+prms.data_dir = '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/'
+prms.metric = 'hit_rate'
+prms.time_window = 'stim-target'
+prms.frqcutoff = [2 10]; 
+BehaviorOscillationStim(subj_name, prms)
 
 
 
