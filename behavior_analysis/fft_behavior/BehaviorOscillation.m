@@ -1,9 +1,9 @@
 function BehaviorOscillation(subj_name, prms)
 %
-% cfg.tvec =  cue-target interval range of interest, (e.g. 500:1200)
-% cfg.data_dir =  (e.g. '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/')
-% cfg.metric = bahevioral metric, 'hit_rate' or 'RT'
-% cfg.frqcutoff = frequency range to plot the behavioral fft (e.g. 2:10);
+% prms.tvec =  cue-target interval range of interest, (e.g. 500:1200)
+% prms.metric = bahevioral metric, 'hit_rate' or 'RT'
+% prms.frqcutoff = frequency range to plot the behavioral fft (e.g. 2:10);
+% prms.data_dir =  (e.g. '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/')
 
 % List files
 % data_dir = fullfile(root_dir,'data',subj_name, day_tag);
@@ -101,12 +101,13 @@ box on
 subplot(1,3,3)
 hold on
 frqcutoff = find(behavfft.freq>=prms.frqcutoff(1) & behavfft.freq<=prms.frqcutoff(2));
-plot(behavfft.freq(frqcutoff), powspctrm_z(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
+plot(behavfft.freq(frqcutoff), behavfft.powspctrm(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
 xlabel('Frequency Hz')
-ylabel('Norm. Power')
+ylabel('Power')
 set(gca,'fontsize',fontsize)
 box on
 set(gcf,'color','w');
+ylim([0 350])
 
 % Save
 savePNG(gcf, 300, sprintf('%s/%s_%s.png' , data_dir, subj_name, prms.metric))

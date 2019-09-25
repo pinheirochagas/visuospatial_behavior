@@ -14,6 +14,15 @@ data_files = dir(fullfile(data_dir, ['*' subj_name '*.mat']));
 for i = 1:length(data_files)
     load([data_files(i).folder filesep data_files(i).name ])
     data_tmp = slist;
+%     for ii = 1:size(data_tmp,1)
+%         if data_tmp.cue_pos(ii) == 1 || data_tmp.cue_pos(ii) == 2
+%             data_tmp.CueLoc{ii} = 'left';
+%         else
+%             data_tmp.CueLoc{ii} = 'right';
+%         end     
+%     end
+%     data_tmp = data_tmp(strcmp(data_tmp.CueLoc, 'right'),:);
+    
     datastim = data_tmp(data_tmp.TTL(:,3) == 128,:);
     datanostim = data_tmp(data_tmp.TTL(:,3) == 8,:);
     correctstim(i) = sum(datastim.error_type == 5)/ size(datastim,1);
@@ -157,6 +166,14 @@ frqcutoff = find(behavfft.ns.freq>=prms.frqcutoff(1) & behavfft.ns.freq<=prms.fr
 plot(behavfft.ns.freq(frqcutoff), behavfft.ns.powspctrm(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
 frqcutoff = find(behavfft.s.freq>=prms.frqcutoff(1) & behavfft.s.freq<=prms.frqcutoff(2));
 plot(behavfft.s.freq(frqcutoff), behavfft.s.powspctrm(frqcutoff), 'LineWidth', linewidth, 'Color', 'r')
+
+% frqcutoff = find(behavfft.ns.freq>=prms.frqcutoff(1) & behavfft.ns.freq<=prms.frqcutoff(2));
+% plot(behavfft.ns.freq(frqcutoff), powspctrm_z.ns(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
+% frqcutoff = find(behavfft.s.freq>=prms.frqcutoff(1) & behavfft.s.freq<=prms.frqcutoff(2));
+% plot(behavfft.s.freq(frqcutoff), powspctrm_z.s(frqcutoff), 'LineWidth', linewidth, 'Color', 'r')
+% 
+
+
 xlabel('Frequency Hz')
 ylabel('Power')
 set(gca,'fontsize',fontsize)
