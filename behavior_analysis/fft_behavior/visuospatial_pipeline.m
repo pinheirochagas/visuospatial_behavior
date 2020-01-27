@@ -3,21 +3,96 @@ addpath(genpath('/Users/pinheirochagas/Pedro/Stanford/code/visuospatial_behavior
 addpath('/Users/pinheirochagas/Pedro/Stanford/code/fieldtrip/')
 ft_defaults
 
-subj_name = {'S19_141'};
-days = [2, 3, 2, 3, 3];
+subj_name = {'NC0018', 'NC0019'};
+days = [1, 2, 3];
 
 
 root_dir = '/Volumes/LBCN8T/Stanford/visuospatial/';
 
 root_dir = '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/'
 
+prms = [];
+prms.data_dir = '/Users/pinheirochagas/Pedro/drive/Stanford/projects/visuospatial_attention/EglyDriver/Data/';
+prms.metric = 'RT';
+prms.time_window = 'stim-target';
+prms.tvec =  500:1200;
+prms.frqcutoff = [2 15]; 
+prms.plot = 1;
+
 for i = 1:length(subj_name)
-    for ii = 1:days(i)
+    for ii = 1:length(days)
         day_tag = ['Day' num2str(ii)];
-        behavfft = BehaviorOscillation(root_dir, subj_name{i}, day_tag);
+        prms.day_tag = day_tag;
+        BehaviorOscillation(subj_name{i}, prms);
     end
 end
 
+prms.day_tag = []
+for i = 1:length(subj_name)
+    BehaviorOscillation(subj_name{i}, prms);
+end
+
+
+%% Plot combined days
+subj_name = {'NC0012', 'NC0013', 'NC0015', 'NC0016', 'NC0017','NC0018', 'NC0019'};
+
+linewidth = 2;
+fontsize = 12;
+
+prms.plot = 0;
+metric = {'hit_rate', 'RT'};
+ylabels = repelem(metric, 1, length(days));
+colors = {'r', 'g', 'b'};
+
+count_day_plot = 1;
+count_day_label = 1;
+
+count_day_plot_2 = [2,3,5,6,8,9];
+
+
+outdir = [prms.data_dir 'results' filesep];
+for i = 1:length(subj_name)
+    figure('units', 'normalized', 'outerposition', [0 0 1 1]) % [0 0 .6 .3]
+    for im = 1:length(metric)
+        for ii = 1:length(days)
+            day_tag = ['Day' num2str(ii)];
+            prms.day_tag = day_tag;
+            prms.metric = metric{im};
+            [AC_sm, behavGA, behavfft, correct] = BehaviorOscillation(subj_name{i}, prms);
+            
+            % Behavioral time course
+            subplot(6,3,count_day_plot)
+            plot(behavGA.time{1}*1000,behavGA.trial{1}, 'LineWidth', linewidth, 'Color', colors{ii})
+            title([day_tag '_' prms.metric], 'Interpreter', 'none')
+            ylabel(ylabels{count_day_label},  'Interpreter', 'none')
+            xlabel('Time (ms)') 
+            grid on
+
+            % Power spectrum
+            subplot(6,3,count_day_plot_2)
+            frqcutoff = find(behavfft.freq>=prms.frqcutoff(1) & behavfft.freq<=prms.frqcutoff(2));
+            plot(behavfft.freq(frqcutoff), behavfft.powspctrm(frqcutoff), 'LineWidth', linewidth+2, 'Color', colors{ii})
+            xlabel('Frequency Hz')
+            ylabel('Power')
+            set(gca,'fontsize',fontsize)
+            title(prms.metric, 'Interpreter', 'none')
+            grid on
+         
+            count_day_plot = count_day_plot + 3;
+            count_day_label = count_day_label + 1;
+            hold on
+            
+        end
+        count_day_plot_2 = count_day_plot_2 + 9;
+    end
+    count_day_label = 1;
+    count_day_plot = 1;
+    count_day_plot_2 = [2,3,5,6,8,9];
+    
+    % Save
+    savePNG(gcf, 300, sprintf('%s%s_bh_oscillation_combined.png' , outdir, subj_name{i}))
+    close all
+end
 
 
 

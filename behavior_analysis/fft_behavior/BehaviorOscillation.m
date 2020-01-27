@@ -1,4 +1,4 @@
-function BehaviorOscillation(subj_name, prms)
+function [AC_sm, behavGA, behavfft, correct] = BehaviorOscillation(subj_name, prms)
 %
 % prms.tvec =  cue-target interval range of interest, (e.g. 500:1200)
 % prms.metric = bahevioral metric, 'hit_rate' or 'RT'
@@ -8,7 +8,15 @@ function BehaviorOscillation(subj_name, prms)
 % List files
 % data_dir = fullfile(root_dir,'data',subj_name, day_tag);
 data_dir = [prms.data_dir subj_name];
-data_files = dir(fullfile(data_dir, ['*' subj_name '*.mat']));
+
+if ~isempty(prms.day_tag)
+    data_files = dir(fullfile([data_dir filesep prms.day_tag], ['*' subj_name '*.mat']));
+    outdir = [prms.data_dir 'results' filesep];
+else
+    data_files = dir(fullfile(data_dir, ['*' subj_name '*.mat']));
+    outdir = [prms.data_dir 'results' filesep];
+end
+
 
 % Time
 tvec = 500:1200;
@@ -25,15 +33,6 @@ for i = 1:length(data_files)
     end
 end
 
-% Plot accuracy
-hold on
-plot(correct, '-o', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'k')
-
-xlabel('Block number')
-ylabel('Accuracy')
-hold on
-set(gca,'fontsize',20)
-savePNG(gcf, 300, [data_dir subj_name '_stim_accuracy.png'])
 
 % Count hit rate
 stepsize = 30; % to be defined
@@ -67,48 +66,74 @@ powspctrm_z = (pw - min(pw)) / (max(pw) - min(pw));
 
 
 %% Plotting
-figure('units', 'normalized', 'outerposition', [0 0 1 .45]) % [0 0 .6 .3]
-linewidth = 3;
-fontsize = 16;
+if prms.plot == true
+    % Plot accuracy
+    hold on
+    plot(correct, '-o', 'LineWidth', 2, 'MarkerSize', 10, 'Color', 'k')
 
-subplot(1,3,1)
-hold on
-histogram(data.response_time(data.response>0), 'FaceColor', [1 1 1], 'EdgeColor', 'k', 'LineWidth', 2)
-xlabel('RT ms')
-ylabel('Frequency')
-set(gca,'fontsize',fontsize)
-box on
+    xlabel('Block number')
+    ylabel('Accuracy')
+    hold on
+    set(gca,'fontsize',20)
+    if ~isempty(prms.day_tag)
+        savePNG(gcf, 300, [outdir subj_name '_' prms.day_tag '_stim_accuracy.png'])
+    else
+        savePNG(gcf, 300, [outdir subj_name '_stim_accuracy_all_days.png'])
+    end
 
-subplot(1,3,2)
-hold on
-plot(behavGA.time{1}*1000,AC, 'LineWidth', 1, 'Color',[.7 .7 .7])
-plot(behavGA.time{1}*1000,behavGA.trial{1}, 'LineWidth', linewidth, 'Color', 'k')
-xlim([min(behavGA.time{1}*1000) max(behavGA.time{1}*1000)])
 
-plot(xlim, [mean(AC) mean(AC)], 'Color', 'k', 'LineWidth',1)
-xlabel('Cue-Target interval ms')
-if strcmp(prms.metric, 'hit_rate')
-    ylabel('Hit Rate')
-elseif strcmp(prms.metric, 'RT')
-    ylabel('RT (ms)')
+    figure('units', 'normalized', 'outerposition', [0 0 1 .45]) % [0 0 .6 .3]
+    linewidth = 3;
+    fontsize = 16;
+
+    subplot(1,3,1)
+    hold on
+    histogram(data.response_time(data.response>0), 'FaceColor', [1 1 1], 'EdgeColor', 'k', 'LineWidth', 2)
+    xlabel('RT ms')
+    ylabel('Frequency')
+    set(gca,'fontsize',fontsize)
+    box on
+
+    subplot(1,3,2)
+    hold on
+    plot(behavGA.time{1}*1000,AC, 'LineWidth', 1, 'Color',[.7 .7 .7])
+    plot(behavGA.time{1}*1000,behavGA.trial{1}, 'LineWidth', linewidth, 'Color', 'k')
+    xlim([min(behavGA.time{1}*1000) max(behavGA.time{1}*1000)])
+
+    plot(xlim, [mean(AC) mean(AC)], 'Color', 'k', 'LineWidth',1)
+    xlabel('Cue-Target interval ms')
+    if strcmp(prms.metric, 'hit_rate')
+        ylabel('Hit Rate')
+    elseif strcmp(prms.metric, 'RT')
+        ylabel('RT (ms)')
+    else
+    end
+
+    set(gca,'fontsize',fontsize)
+    % ylim([0 1])
+    box on
+
+    subplot(1,3,3)
+    hold on
+    frqcutoff = find(behavfft.freq>=prms.frqcutoff(1) & behavfft.freq<=prms.frqcutoff(2));
+    plot(behavfft.freq(frqcutoff), behavfft.powspctrm(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
+    xlabel('Frequency Hz')
+    ylabel('Power')
+    set(gca,'fontsize',fontsize)
+    box on
+    set(gcf,'color','w');
+    % ylim([0 350])
+
+    % Save
+    if ~isempty(prms.day_tag)
+        savePNG(gcf, 300, sprintf('%s%s_%s_%s.png' , outdir, subj_name, prms.day_tag, prms.metric))
+    else
+        savePNG(gcf, 300, sprintf('%s%s_%s_all_days.png' , outdir, subj_name, prms.metric))
+    end
+    close all
+
 else
 end
 
-set(gca,'fontsize',fontsize)
-% ylim([0 1])
-box on
 
-subplot(1,3,3)
-hold on
-frqcutoff = find(behavfft.freq>=prms.frqcutoff(1) & behavfft.freq<=prms.frqcutoff(2));
-plot(behavfft.freq(frqcutoff), behavfft.powspctrm(frqcutoff), 'LineWidth', linewidth, 'Color', 'k')
-xlabel('Frequency Hz')
-ylabel('Power')
-set(gca,'fontsize',fontsize)
-box on
-set(gcf,'color','w');
-ylim([0 350])
-
-% Save
-savePNG(gcf, 300, sprintf('%s/%s_%s.png' , data_dir, subj_name, prms.metric))
 end
